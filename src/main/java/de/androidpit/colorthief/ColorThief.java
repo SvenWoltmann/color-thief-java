@@ -28,6 +28,7 @@ public class ColorThief
 {
 
     private static final int DEFAULT_QUALITY = 10;
+    private static final boolean DEFAULT_IGNORE_WHITE = true;
 
     /**
      * Use the median cut algorithm to cluster similar colors and return the
@@ -41,6 +42,10 @@ public class ColorThief
     public static int[] getColor(BufferedImage sourceImage)
     {
         int[][] palette = getPalette(sourceImage, 5);
+        if (palette == null)
+        {
+            return null;
+        }
         int[] dominantColor = palette[0];
         return dominantColor;
     }
@@ -57,12 +62,21 @@ public class ColorThief
      *            the faster a color will be returned but the greater the
      *            likelihood that it will not be the visually most dominant
      *            color.
+     * @param ignoreWhite
+     *            if <code>true</code>, white pixels are ignored
      *
      * @return the dominant color as RGB array
      */
-    public static int[] getColor(BufferedImage sourceImage, int quality)
+    public static int[] getColor(
+            BufferedImage sourceImage,
+            int quality,
+            boolean ignoreWhite)
     {
-        int[][] palette = getPalette(sourceImage, 5, quality);
+        int[][] palette = getPalette(sourceImage, 5, quality, ignoreWhite);
+        if (palette == null)
+        {
+            return null;
+        }
         int[] dominantColor = palette[0];
         return dominantColor;
     }
@@ -80,6 +94,10 @@ public class ColorThief
     public static int[][] getPalette(BufferedImage sourceImage, int colorCount)
     {
         CMap cmap = getColorMap(sourceImage, colorCount);
+        if (cmap == null)
+        {
+            return null;
+        }
         return cmap.palette();
     }
 
@@ -95,15 +113,22 @@ public class ColorThief
      *            a trade-off between quality and speed. The bigger the number,
      *            the faster the palette generation but the greater the
      *            likelihood that colors will be missed.
+     * @param ignoreWhite
+     *            if <code>true</code>, white pixels are ignored
      * 
      * @return the palette as array of RGB arrays
      */
     public static int[][] getPalette(
             BufferedImage sourceImage,
             int colorCount,
-            int quality)
+            int quality,
+            boolean ignoreWhite)
     {
-        CMap cmap = getColorMap(sourceImage, colorCount, quality);
+        CMap cmap = getColorMap(sourceImage, colorCount, quality, ignoreWhite);
+        if (cmap == null)
+        {
+            return null;
+        }
         return cmap.palette();
     }
 
@@ -119,7 +144,11 @@ public class ColorThief
      */
     public static CMap getColorMap(BufferedImage sourceImage, int colorCount)
     {
-        return getColorMap(sourceImage, colorCount, DEFAULT_QUALITY);
+        return getColorMap(
+                sourceImage,
+                colorCount,
+                DEFAULT_QUALITY,
+                DEFAULT_IGNORE_WHITE);
     }
 
     /**
@@ -134,13 +163,16 @@ public class ColorThief
      *            a trade-off between quality and speed. The bigger the number,
      *            the faster the palette generation but the greater the
      *            likelihood that colors will be missed.
+     * @param ignoreWhite
+     *            if <code>true</code>, white pixels are ignored
      * 
      * @return the color map
      */
     public static CMap getColorMap(
             BufferedImage sourceImage,
             int colorCount,
-            int quality)
+            int quality,
+            boolean ignoreWhite)
     {
         DataBufferByte imageData = (DataBufferByte) sourceImage
                 .getRaster()
@@ -168,7 +200,7 @@ public class ColorThief
                 a = pixels[offset] & 0xFF;
 
                 // If pixel is mostly opaque and not white
-                if (a >= 125 && !(r > 250 && g > 250 && b > 250))
+                if (a >= 125 && !(ignoreWhite && r > 250 && g > 250 && b > 250))
                 {
                     pixelArray[numUsedPixels] = new int[] {r, g, b};
                     numUsedPixels++;
@@ -185,7 +217,7 @@ public class ColorThief
                 b = pixels[offset] & 0xFF;
 
                 // If pixel is not white
-                if (!(r > 250 && g > 250 && b > 250))
+                if (!(ignoreWhite && r > 250 && g > 250 && b > 250))
                 {
                     pixelArray[numUsedPixels] = new int[] {r, g, b};
                     numUsedPixels++;
