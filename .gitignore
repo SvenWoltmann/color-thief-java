@@ -1,2 +1,4 @@
+.settings
 target
-build.xml
+.classpath
+.project
