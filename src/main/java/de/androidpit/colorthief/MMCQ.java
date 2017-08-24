@@ -387,8 +387,7 @@ public class MMCQ {
                 if (left <= right) {
                     d2 = Math.min(vbox_dim2 - 1, ~~(i + right / 2));
                 } else {
-                    // 2.0 and cast to int is necessary to have the same
-                    // behaviour as in JavaScript
+                    // 2.0 and cast to int is necessary to have the same behaviour as in JavaScript
                     d2 = Math.max(vbox_dim1, ~~((int) (i - 1 - left / 2.0)));
                 }
 
@@ -441,8 +440,7 @@ public class MMCQ {
         // first set of colors, sorted by population
         iter(pq, COMPARATOR_COUNT, target, histo);
 
-        // Re-sort by the product of pixel occupancy times the size in color
-        // space.
+        // Re-sort by the product of pixel occupancy times the size in color space.
         Collections.sort(pq, COMPARATOR_PRODUCT);
 
         // next set - generate the median cuts using the (npix * vol) sorting.

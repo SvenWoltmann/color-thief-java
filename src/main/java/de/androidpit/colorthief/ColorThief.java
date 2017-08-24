@@ -22,7 +22,6 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.util.Arrays;
 
-import de.androidpit.colorthief.MMCQ;
 import de.androidpit.colorthief.MMCQ.CMap;
 
 public class ColorThief {
@@ -62,7 +61,8 @@ public class ColorThief {
      *            if <code>true</code>, white pixels are ignored
      *
      * @return the dominant color as RGB array
-     * @throws IllegalArgumentException if quality is < 1
+     * @throws IllegalArgumentException
+     *             if quality is < 1
      */
     public static int[] getColor(BufferedImage sourceImage, int quality, boolean ignoreWhite) {
         int[][] palette = getPalette(sourceImage, 5, quality, ignoreWhite);
@@ -106,7 +106,8 @@ public class ColorThief {
      *            if <code>true</code>, white pixels are ignored
      * 
      * @return the palette as array of RGB arrays
-     * @throws IllegalArgumentException if quality is < 1
+     * @throws IllegalArgumentException
+     *             if quality is < 1
      */
     public static int[][] getPalette(
             BufferedImage sourceImage,
@@ -149,7 +150,8 @@ public class ColorThief {
      *            if <code>true</code>, white pixels are ignored
      * 
      * @return the color map
-     * @throws IllegalArgumentException if quality is < 1
+     * @throws IllegalArgumentException
+     *             if quality is < 1
      */
     public static CMap getColorMap(
             BufferedImage sourceImage,
@@ -172,8 +174,7 @@ public class ColorThief {
             pixelArray = getPixelsSlow(sourceImage, quality, ignoreWhite);
         }
 
-        // Send array to quantize function which clusters values using median
-        // cut algorithm
+        // Send array to quantize function which clusters values using median cut algorithm
         CMap cmap = MMCQ.quantize(pixelArray, colorCount);
         return cmap;
     }
@@ -223,11 +224,10 @@ public class ColorThief {
                             + pixels.length + ")");
         }
 
-        // Store the RGB values in an array format suitable for quantize
-        // function
+        // Store the RGB values in an array format suitable for quantize function
 
-        // numRegardedPixels must be rounded up to avoid an
-        // ArrayIndexOutOfBoundsException if all pixels are good.
+        // numRegardedPixels must be rounded up to avoid an ArrayIndexOutOfBoundsException if all
+        // pixels are good.
         int numRegardedPixels = (pixelCount + quality - 1) / quality;
 
         int numUsedPixels = 0;
@@ -299,8 +299,8 @@ public class ColorThief {
 
         int pixelCount = width * height;
 
-        // numRegardedPixels must be rounded up to avoid an
-        // ArrayIndexOutOfBoundsException if all pixels are good.
+        // numRegardedPixels must be rounded up to avoid an ArrayIndexOutOfBoundsException if all
+        // pixels are good.
         int numRegardedPixels = (pixelCount + quality - 1) / quality;
 
         int numUsedPixels = 0;
