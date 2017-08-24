@@ -21,6 +21,8 @@ package de.androidpit.colorthief.test;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import javax.imageio.ImageIO;
 
@@ -31,17 +33,29 @@ import de.androidpit.colorthief.MMCQ.VBox;
 public class ColorThiefTest {
 
     public static void main(String[] args) throws IOException {
+        ColorThiefTest test = new ColorThiefTest();
+
+        test.test("examples/img/photo1.jpg");
+        test.test("examples/img/photo2.jpg");
+        test.test("examples/img/photo3.jpg");
+
+        test.saveToHTMLFile("examples-test.html");
+
+        System.out.println("Finished.");
+    }
+
+    private StringBuilder sb;
+
+    private ColorThiefTest() {
+        sb = new StringBuilder();
         printStyleHeader();
-        test("examples/img/photo1.jpg");
-        test("examples/img/photo2.jpg");
-        test("examples/img/photo3.jpg");
     }
 
     /**
      * Prints a style header.
      */
-    private static void printStyleHeader() {
-        System.out.println(
+    private void printStyleHeader() {
+        sb.append(
                 "<style>div.color{width:4em;height:4em;float:left;margin:0 1em 1em 0;}"
                         + "th{text-align:left}"
                         + "td{vertical-align:top;padding-right:1em}</style>");
@@ -56,19 +70,22 @@ public class ColorThiefTest {
      * @throws IOException
      *             if an I/O error occurs
      */
-    private static void test(String pathname) throws IOException {
-        System.out.println("<h1>Image: &quot;" + pathname + "&quot</h1>");
+    private void test(String pathname) throws IOException {
+        System.out.println("Analyzing image " + pathname + "...");
+
+        sb.append("<h1>Image: &quot;").append(pathname).append("&quot</h1>");
+        sb.append("<p><img src=\"").append(pathname).append("\" style=\"max-width:100%\"></p>");
 
         BufferedImage img = ImageIO.read(new File(pathname));
 
         // The dominant color is taken from a 5-map
-        System.out.println("<h2>Dominant Color</h2>");
+        sb.append("<h2>Dominant Color</h2>");
         CMap result = ColorThief.getColorMap(img, 5);
         VBox dominantColor = result.vboxes.get(0);
         printVBox(dominantColor);
 
         // Get the full palette
-        System.out.println("<h2>Palette</h2>");
+        sb.append("<h2>Palette</h2>");
         result = ColorThief.getColorMap(img, 10);
         for (VBox vbox : result.vboxes) {
             printVBox(vbox);
@@ -81,31 +98,29 @@ public class ColorThiefTest {
      * @param vbox
      *            the vbox
      */
-    private static void printVBox(VBox vbox) {
+    private void printVBox(VBox vbox) {
         int[] rgb = vbox.avg(false);
 
         // Create color String representations
         String rgbString = createRGBString(rgb);
         String rgbHexString = createRGBHexString(rgb);
 
-        StringBuilder line = new StringBuilder();
-
-        line.append("<div>");
+        sb.append("<div>");
 
         // Print color box
-        line
+        sb
                 .append("<div class=\"color\" style=\"background:") //
                 .append(rgbString)
                 .append(";\"></div>");
 
         // Print table with color code and VBox information
-        line.append(
+        sb.append(
                 "<table><tr><th>Color code:</th>" //
                         + "<th>Volume &times pixel count:</th>" //
                         + "<th>VBox:</th></tr>");
 
         // Color code
-        line
+        sb
                 .append("<tr><td>") //
                 .append(rgbString)
                 .append(" / ")
@@ -115,7 +130,7 @@ public class ColorThiefTest {
         // Volume / pixel count
         int volume = vbox.volume(false);
         int count = vbox.count(false);
-        line
+        sb
                 .append("<td>")
                 .append(String.format("%,d", volume))
                 .append(" &times; ")
@@ -125,17 +140,15 @@ public class ColorThiefTest {
                 .append("</td>");
 
         // VBox
-        line
+        sb
                 .append("<td>") //
                 .append(vbox.toString())
                 .append("</td></tr></table>");
 
         // Stop floating
-        line.append("<div style=\"clear:both\"></div>");
+        sb.append("<div style=\"clear:both\"></div>");
 
-        line.append("</div>");
-
-        System.out.println(line);
+        sb.append("</div>");
     }
 
     /**
@@ -146,7 +159,7 @@ public class ColorThiefTest {
      * 
      * @return the string representation
      */
-    private static String createRGBString(int[] rgb) {
+    private String createRGBString(int[] rgb) {
         return "rgb(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + ")";
     }
 
@@ -158,7 +171,7 @@ public class ColorThiefTest {
      * 
      * @return the HTML hex color code
      */
-    private static String createRGBHexString(int[] rgb) {
+    private String createRGBHexString(int[] rgb) {
         String rgbHex = Integer.toHexString(rgb[0] << 16 | rgb[1] << 8 | rgb[2]);
 
         // Left-pad with 0s
@@ -168,6 +181,21 @@ public class ColorThiefTest {
         }
 
         return "#" + rgbHex;
+    }
+
+    /**
+     * Saves the test results in an HTML file.
+     * 
+     * @param fileName
+     *            the file name
+     */
+    private void saveToHTMLFile(String fileName) {
+        System.out.println("Saving HTML file...");
+        try {
+            Files.write(Paths.get(fileName), sb.toString().getBytes());
+        } catch (IOException ex) {
+            System.out.println("Error saving HTML file: " + ex.getMessage());
+        }
     }
 
 }
