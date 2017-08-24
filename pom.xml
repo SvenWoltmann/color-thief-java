@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.androidpit</groupId>
 	<artifactId>color-thief</artifactId>
-	<version>1.0.1-SNAPSHOT</version>
+	<version>1.1.0</version>
 	<name>Color Thief - A Fast Java Implementation</name>
 	<description>Grabs the dominant color or a representative color palette from an image. A very fast Java port of Lokesh Dhakar's JavaScript version.</description>
 
