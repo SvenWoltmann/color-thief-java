@@ -28,11 +28,9 @@ import de.androidpit.colorthief.ColorThief;
 import de.androidpit.colorthief.MMCQ.CMap;
 import de.androidpit.colorthief.MMCQ.VBox;
 
-public class ColorThiefTest
-{
+public class ColorThiefTest {
 
-    public static void main(String[] args) throws IOException
-    {
+    public static void main(String[] args) throws IOException {
         printStyleHeader();
         test("examples/img/photo1.jpg");
         test("examples/img/photo2.jpg");
@@ -42,10 +40,9 @@ public class ColorThiefTest
     /**
      * Prints a style header.
      */
-    private static void printStyleHeader()
-    {
-        System.out
-                .println("<style>div.color{width:4em;height:4em;float:left;margin:0 1em 1em 0;}"
+    private static void printStyleHeader() {
+        System.out.println(
+                "<style>div.color{width:4em;height:4em;float:left;margin:0 1em 1em 0;}"
                         + "th{text-align:left}"
                         + "td{vertical-align:top;padding-right:1em}</style>");
     }
@@ -59,8 +56,7 @@ public class ColorThiefTest
      * @throws IOException
      *             if an I/O error occurs
      */
-    private static void test(String pathname) throws IOException
-    {
+    private static void test(String pathname) throws IOException {
         System.out.println("<h1>Image: &quot;" + pathname + "&quot</h1>");
 
         BufferedImage img = ImageIO.read(new File(pathname));
@@ -74,8 +70,7 @@ public class ColorThiefTest
         // Get the full palette
         System.out.println("<h2>Palette</h2>");
         result = ColorThief.getColorMap(img, 10);
-        for (VBox vbox : result.vboxes)
-        {
+        for (VBox vbox : result.vboxes) {
             printVBox(vbox);
         }
     }
@@ -86,8 +81,7 @@ public class ColorThiefTest
      * @param vbox
      *            the vbox
      */
-    private static void printVBox(VBox vbox)
-    {
+    private static void printVBox(VBox vbox) {
         int[] rgb = vbox.avg(false);
 
         // Create color String representations
@@ -100,19 +94,19 @@ public class ColorThiefTest
 
         // Print color box
         line
-                .append("<div class=\"color\" style=\"background:")
+                .append("<div class=\"color\" style=\"background:") //
                 .append(rgbString)
                 .append(";\"></div>");
 
         // Print table with color code and VBox information
-        line
-                .append("<table><tr><th>Color code:</th>"
-                        + "<th>Volume &times pixel count:</th>"
+        line.append(
+                "<table><tr><th>Color code:</th>" //
+                        + "<th>Volume &times pixel count:</th>" //
                         + "<th>VBox:</th></tr>");
 
         // Color code
         line
-                .append("<tr><td>")
+                .append("<tr><td>") //
                 .append(rgbString)
                 .append(" / ")
                 .append(rgbHexString)
@@ -132,7 +126,7 @@ public class ColorThiefTest
 
         // VBox
         line
-                .append("<td>")
+                .append("<td>") //
                 .append(vbox.toString())
                 .append("</td></tr></table>");
 
@@ -152,29 +146,24 @@ public class ColorThiefTest
      * 
      * @return the string representation
      */
-    private static String createRGBString(int[] rgb)
-    {
+    private static String createRGBString(int[] rgb) {
         return "rgb(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + ")";
     }
 
     /**
-     * Creates an HTML hex color code for the given RGB array (e.g.
-     * <code>#ff0000</code> for red).
+     * Creates an HTML hex color code for the given RGB array (e.g. <code>#ff0000</code> for red).
      * 
      * @param rgb
      *            the RGB array
      * 
      * @return the HTML hex color code
      */
-    private static String createRGBHexString(int[] rgb)
-    {
-        String rgbHex = Integer
-                .toHexString(rgb[0] << 16 | rgb[1] << 8 | rgb[2]);
+    private static String createRGBHexString(int[] rgb) {
+        String rgbHex = Integer.toHexString(rgb[0] << 16 | rgb[1] << 8 | rgb[2]);
 
         // Left-pad with 0s
         int length = rgbHex.length();
-        if (length < 6)
-        {
+        if (length < 6) {
             rgbHex = "00000".substring(0, 6 - length) + rgbHex;
         }
 
