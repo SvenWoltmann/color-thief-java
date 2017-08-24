@@ -20,21 +20,18 @@ package de.androidpit.colorthief.test;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
 import de.androidpit.colorthief.ColorThief;
 import de.androidpit.colorthief.MMCQ.CMap;
 
-public class ColorThiefPerformanceTest
-{
+public class ColorThiefPerformanceTest {
 
     private static final int NUM_TESTS_WARMUP = 500;
     private static final int NUM_TESTS = 500;
 
-    public static void main(String[] args) throws Exception
-    {
+    public static void main(String[] args) throws Exception {
         BufferedImage img1 = ImageIO.read(new File("examples/img/photo1.jpg"));
         BufferedImage img2 = ImageIO.read(new File("examples/img/photo2.jpg"));
         BufferedImage img3 = ImageIO.read(new File("examples/img/photo3.jpg"));
@@ -49,22 +46,16 @@ public class ColorThiefPerformanceTest
         test(img1, img2, img3, NUM_TESTS);
         long end = System.currentTimeMillis();
         long total = end - start;
-        System.out.println("Total time = " + total + " ms / per image = "
-                + ((double) total / NUM_TESTS / 3) + " ms");
+        System.out.println(
+                "Total time = " + total + " ms / per image = " + ((double) total / NUM_TESTS / 3)
+                        + " ms");
     }
 
-    private static void test(
-            BufferedImage img1,
-            BufferedImage img2,
-            BufferedImage img3,
-            int max) throws IOException
-    {
+    private static void test(BufferedImage img1, BufferedImage img2, BufferedImage img3, int max) {
         long sum = 0;
 
-        for (int i = 0; i < max; i++)
-        {
-            if (i % 100 == 0)
-            {
+        for (int i = 0; i < max; i++) {
+            if (i % 100 == 0) {
                 System.out.println("Round " + (i + 1) + " of " + max + "...");
             }
 

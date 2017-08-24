@@ -1,4 +1,4 @@
-#Color Thief - A Fast Java Implementation
+# Color Thief - A Fast Java Implementation
 
 Grabs the dominant color or a representative color palette from an image.
 
@@ -9,12 +9,12 @@ This version is more than 40 times faster than the Java port at https://github.c
 * This version: 0.712 ms
 
 
-##Credits and license
+## Credits and license
 
-###Thanks
+### Thanks
 * Lokesh Dhakar - for the original Color Thief JavaScript version, available at http://lokeshdhakar.com/projects/color-thief/
 
-###License
+### License
 Licensed under the [Creative Commons Attribution 2.5 License](http://creativecommons.org/licenses/by/2.5/)
 
 * Free for use in both personal and commercial projects.
