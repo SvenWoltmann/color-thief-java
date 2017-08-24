@@ -55,13 +55,14 @@ public class ColorThief {
      * @param sourceImage
      *            the source image
      * @param quality
-     *            0 is the highest quality settings. 10 is the default. There is a trade-off between
+     *            1 is the highest quality settings. 10 is the default. There is a trade-off between
      *            quality and speed. The bigger the number, the faster a color will be returned but
      *            the greater the likelihood that it will not be the visually most dominant color.
      * @param ignoreWhite
      *            if <code>true</code>, white pixels are ignored
      *
      * @return the dominant color as RGB array
+     * @throws IllegalArgumentException if quality is < 1
      */
     public static int[] getColor(BufferedImage sourceImage, int quality, boolean ignoreWhite) {
         int[][] palette = getPalette(sourceImage, 5, quality, ignoreWhite);
@@ -98,13 +99,14 @@ public class ColorThief {
      * @param colorCount
      *            the size of the palette; the number of colors returned
      * @param quality
-     *            0 is the highest quality settings. 10 is the default. There is a trade-off between
+     *            1 is the highest quality settings. 10 is the default. There is a trade-off between
      *            quality and speed. The bigger the number, the faster the palette generation but
      *            the greater the likelihood that colors will be missed.
      * @param ignoreWhite
      *            if <code>true</code>, white pixels are ignored
      * 
      * @return the palette as array of RGB arrays
+     * @throws IllegalArgumentException if quality is < 1
      */
     public static int[][] getPalette(
             BufferedImage sourceImage,
@@ -140,19 +142,24 @@ public class ColorThief {
      * @param colorCount
      *            the size of the palette; the number of colors returned
      * @param quality
-     *            0 is the highest quality settings. 10 is the default. There is a trade-off between
+     *            1 is the highest quality settings. 10 is the default. There is a trade-off between
      *            quality and speed. The bigger the number, the faster the palette generation but
      *            the greater the likelihood that colors will be missed.
      * @param ignoreWhite
      *            if <code>true</code>, white pixels are ignored
      * 
      * @return the color map
+     * @throws IllegalArgumentException if quality is < 1
      */
     public static CMap getColorMap(
             BufferedImage sourceImage,
             int colorCount,
             int quality,
             boolean ignoreWhite) {
+        if (quality < 1) {
+            throw new IllegalArgumentException("Specified quality should be greater then 0.");
+        }
+
         int[][] pixelArray;
 
         switch (sourceImage.getType()) {
@@ -178,7 +185,7 @@ public class ColorThief {
      * @param sourceImage
      *            the source image
      * @param quality
-     *            0 is the highest quality settings. 10 is the default. There is a trade-off between
+     *            1 is the highest quality settings. 10 is the default. There is a trade-off between
      *            quality and speed. The bigger the number, the faster the palette generation but
      *            the greater the likelihood that colors will be missed.
      * @param ignoreWhite
@@ -275,7 +282,7 @@ public class ColorThief {
      * @param sourceImage
      *            the source image
      * @param quality
-     *            0 is the highest quality settings. 10 is the default. There is a trade-off between
+     *            1 is the highest quality settings. 10 is the default. There is a trade-off between
      *            quality and speed. The bigger the number, the faster the palette generation but
      *            the greater the likelihood that colors will be missed.
      * @param ignoreWhite
