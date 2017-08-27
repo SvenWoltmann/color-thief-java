@@ -521,7 +521,7 @@ public class MMCQ {
             }
 
             // Otherwise sort by products
-            return aCount * aVolume - bCount * bVolume;
+            return Long.compare((long) aCount * aVolume, (long) bCount * bVolume);
         }
     };
 
