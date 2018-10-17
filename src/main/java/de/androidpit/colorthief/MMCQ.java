@@ -444,7 +444,9 @@ public class MMCQ {
         Collections.sort(pq, COMPARATOR_PRODUCT);
 
         // next set - generate the median cuts using the (npix * vol) sorting.
-        iter(pq, COMPARATOR_PRODUCT, maxcolors - pq.size(), histo);
+        if (maxcolors > pq.size()) {
+            iter(pq, COMPARATOR_PRODUCT, maxcolors, histo);
+        }
 
         // Reverse to put the highest elements first into the color map
         Collections.reverse(pq);
@@ -462,7 +464,6 @@ public class MMCQ {
      * Inner function to do the iteration.
      */
     private static void iter(List<VBox> lh, Comparator<VBox> comparator, int target, int[] histo) {
-        int ncolors = 1;
         int niters = 0;
         VBox vbox;
 
@@ -487,11 +488,10 @@ public class MMCQ {
             lh.add(vbox1);
             if (vbox2 != null) {
                 lh.add(vbox2);
-                ncolors++;
             }
             Collections.sort(lh, comparator);
 
-            if (ncolors >= target) {
+            if (lh.size() >= target) {
                 return;
             }
             if (niters++ > MAX_ITERATIONS) {

@@ -127,7 +127,7 @@ public class ColorThief {
      * @param sourceImage
      *            the source image
      * @param colorCount
-     *            the size of the palette; the number of colors returned
+     *            the size of the palette; the number of colors returned (minimum 2, maximum 256)
      * 
      * @return the color map
      */
@@ -141,7 +141,7 @@ public class ColorThief {
      * @param sourceImage
      *            the source image
      * @param colorCount
-     *            the size of the palette; the number of colors returned
+     *            the size of the palette; the number of colors returned (minimum 2, maximum 256)
      * @param quality
      *            1 is the highest quality settings. 10 is the default. There is a trade-off between
      *            quality and speed. The bigger the number, the faster the palette generation but
@@ -158,6 +158,9 @@ public class ColorThief {
             int colorCount,
             int quality,
             boolean ignoreWhite) {
+        if (colorCount < 2 || colorCount > 256) {
+            throw new IllegalArgumentException("Specified colorCount must be between 2 and 256.");
+        }
         if (quality < 1) {
             throw new IllegalArgumentException("Specified quality should be greater then 0.");
         }
