@@ -2,8 +2,8 @@
  * Java Color Thief
  * by Sven Woltmann, Fonpit AG
  *
- * http://www.androidpit.com
- * http://www.androidpit.de
+ * https://www.androidpit.com
+ * https://www.androidpit.de
  *
  * License
  * -------

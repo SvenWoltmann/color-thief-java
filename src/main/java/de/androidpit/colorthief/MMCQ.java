@@ -2,8 +2,8 @@
  * Java Color Thief
  * by Sven Woltmann, Fonpit AG
  * 
- * http://www.androidpit.com
- * http://www.androidpit.de
+ * https://www.androidpit.com
+ * https://www.androidpit.de
  *
  * License
  * -------
@@ -205,9 +205,11 @@ public class MMCQ {
             int numVBoxes = vboxes.size();
             for (int i = 0; i < numVBoxes; i++) {
                 int[] vbColor = vboxes.get(i).avg(false);
-                d2 = Math.sqrt(
-                        Math.pow(color[0] - vbColor[0], 2) + Math.pow(color[1] - vbColor[1], 2)
-                                + Math.pow(color[2] - vbColor[2], 2));
+                d2 = Math
+                        .sqrt(
+                                Math.pow(color[0] - vbColor[0], 2)
+                                        + Math.pow(color[1] - vbColor[1], 2)
+                                        + Math.pow(color[2] - vbColor[2], 2));
                 if (d2 < d1) {
                     d1 = d2;
                     pColor = vbColor;

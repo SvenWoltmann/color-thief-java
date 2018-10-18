@@ -2,8 +2,8 @@
  * Java Color Thief
  * by Sven Woltmann, Fonpit AG
  * 
- * http://www.androidpit.com
- * http://www.androidpit.de
+ * https://www.androidpit.com
+ * https://www.androidpit.de
  *
  * License
  * -------
@@ -62,7 +62,7 @@ public class ColorThief {
      *
      * @return the dominant color as RGB array
      * @throws IllegalArgumentException
-     *             if quality is < 1
+     *             if quality is &lt; 1
      */
     public static int[] getColor(BufferedImage sourceImage, int quality, boolean ignoreWhite) {
         int[][] palette = getPalette(sourceImage, 5, quality, ignoreWhite);
@@ -107,7 +107,7 @@ public class ColorThief {
      * 
      * @return the palette as array of RGB arrays
      * @throws IllegalArgumentException
-     *             if quality is < 1
+     *             if quality is &lt; 1
      */
     public static int[][] getPalette(
             BufferedImage sourceImage,
@@ -151,7 +151,7 @@ public class ColorThief {
      * 
      * @return the color map
      * @throws IllegalArgumentException
-     *             if quality is < 1
+     *             if quality is &lt; 1
      */
     public static CMap getColorMap(
             BufferedImage sourceImage,
