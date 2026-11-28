@@ -280,150 +280,152 @@ public class MMCQ {
         return new VBox(rmin, rmax, gmin, gmax, bmin, bmax, histo);
     }
 
-    private static VBox[] medianCutApply(int[] histo, VBox vbox) {
-        if (vbox.count(false) == 0) {
+    private enum RgbAxis {
+        RED, GREEN, BLUE;
+
+        int binCount(VBox box) {
+            if (this == RED) {
+                return box.r2 - box.r1 + 1;
+            } else if (this == GREEN) {
+                return box.g2 - box.g1 + 1;
+            } else {
+                return box.b2 - box.b1 + 1;
+            }
+        }
+    }
+
+    private static VBox[] trySplitBox(int[] histogram, VBox box) {
+        if (box.count(false) < 2 || box.volume(false) == 1) {
             return null;
         }
 
-        // only one pixel, no split
-        if (vbox.count(false) == 1) {
-            return new VBox[] {vbox.clone(), null};
-        }
+        int[] cumulativeCounts = new int[VBOX_LENGTH];
 
-        int rw = vbox.r2 - vbox.r1 + 1;
-        int gw = vbox.g2 - vbox.g1 + 1;
-        int bw = vbox.b2 - vbox.b1 + 1;
-        int maxw = Math.max(Math.max(rw, gw), bw);
-
-        // Find the partial sum arrays along the selected axis.
-        int total = 0;
-        int[] partialsum = new int[VBOX_LENGTH];
-        Arrays.fill(partialsum, -1); // -1 = not set / 0 = 0
-        int[] lookaheadsum = new int[VBOX_LENGTH];
-        Arrays.fill(lookaheadsum, -1); // -1 = not set / 0 = 0
-        int i, j, k, sum, index;
-
-        if (maxw == rw) {
-            for (i = vbox.r1; i <= vbox.r2; i++) {
-                sum = 0;
-                for (j = vbox.g1; j <= vbox.g2; j++) {
-                    for (k = vbox.b1; k <= vbox.b2; k++) {
-                        index = getColorIndex(i, j, k);
-                        sum += histo[index];
-                    }
-                }
-                total += sum;
-                partialsum[i] = total;
+        RgbAxis[] axes = RgbAxis.values();
+        // Try other axes because the widest range may contain no variation among the pixels.
+        Arrays.sort(axes, Comparator.comparingInt((RgbAxis axis) -> axis.binCount(box)).reversed());
+        for (RgbAxis axis : axes) {
+            if (axis.binCount(box) <= 1) {
+                continue;
             }
-        } else if (maxw == gw) {
-            for (i = vbox.g1; i <= vbox.g2; i++) {
-                sum = 0;
-                for (j = vbox.r1; j <= vbox.r2; j++) {
-                    for (k = vbox.b1; k <= vbox.b2; k++) {
-                        index = getColorIndex(j, i, k);
-                        sum += histo[index];
-                    }
-                }
-                total += sum;
-                partialsum[i] = total;
-            }
-        } else
-        /* maxw == bw */
-        {
-            for (i = vbox.b1; i <= vbox.b2; i++) {
-                sum = 0;
-                for (j = vbox.r1; j <= vbox.r2; j++) {
-                    for (k = vbox.g1; k <= vbox.g2; k++) {
-                        index = getColorIndex(j, k, i);
-                        sum += histo[index];
-                    }
-                }
-                total += sum;
-                partialsum[i] = total;
+
+            buildCumulativeCounts(histogram, box, axis, cumulativeCounts);
+            VBox[] children = trySplitAlongAxis(box, axis, cumulativeCounts);
+            if (children != null) {
+                return children;
             }
         }
 
-        for (i = 0; i < VBOX_LENGTH; i++) {
-            if (partialsum[i] != -1) {
-                lookaheadsum[i] = total - partialsum[i];
-            }
-        }
-
-        // determine the cut planes
-        return maxw == rw ? doCut('r', vbox, partialsum, lookaheadsum, total)
-                : maxw == gw ? doCut('g', vbox, partialsum, lookaheadsum, total)
-                        : doCut('b', vbox, partialsum, lookaheadsum, total);
+        return null;
     }
 
-    private static VBox[] doCut(
-            char color,
-            VBox vbox,
-            int[] partialsum,
-            int[] lookaheadsum,
-            int total) {
-        int vbox_dim1;
-        int vbox_dim2;
+    private static void buildCumulativeCounts(
+            int[] histogram,
+            VBox box,
+            RgbAxis axis,
+            int[] cumulativeCounts) {
+        // Overwrite the axis's entire range so later attempts can safely reuse the array.
+        int total = 0;
 
-        if (color == 'r') {
-            vbox_dim1 = vbox.r1;
-            vbox_dim2 = vbox.r2;
-        } else if (color == 'g') {
-            vbox_dim1 = vbox.g1;
-            vbox_dim2 = vbox.g2;
-        } else
-        /* color == 'b' */
-        {
-            vbox_dim1 = vbox.b1;
-            vbox_dim2 = vbox.b2;
-        }
-
-        int left, right;
-        VBox vbox1 = null, vbox2 = null;
-        int d2, count2;
-
-        for (int i = vbox_dim1; i <= vbox_dim2; i++) {
-            if (partialsum[i] > total / 2) {
-                vbox1 = vbox.clone();
-                vbox2 = vbox.clone();
-
-                left = i - vbox_dim1;
-                right = vbox_dim2 - i;
-
-                if (left <= right) {
-                    d2 = Math.min(vbox_dim2 - 1, ~~(i + right / 2));
-                } else {
-                    // 2.0 and cast to int is necessary to have the same behaviour as in JavaScript
-                    d2 = Math.max(vbox_dim1, ~~((int) (i - 1 - left / 2.0)));
+        if (axis == RgbAxis.RED) {
+            for (int red = box.r1; red <= box.r2; red++) {
+                for (int green = box.g1; green <= box.g2; green++) {
+                    for (int blue = box.b1; blue <= box.b2; blue++) {
+                        total += histogram[getColorIndex(red, green, blue)];
+                    }
                 }
-
-                // avoid 0-count boxes
-                while (d2 < 0 || partialsum[d2] <= 0) {
-                    d2++;
+                cumulativeCounts[red] = total;
+            }
+        } else if (axis == RgbAxis.GREEN) {
+            for (int green = box.g1; green <= box.g2; green++) {
+                for (int red = box.r1; red <= box.r2; red++) {
+                    for (int blue = box.b1; blue <= box.b2; blue++) {
+                        total += histogram[getColorIndex(red, green, blue)];
+                    }
                 }
-                count2 = lookaheadsum[d2];
-                while (count2 == 0 && d2 > 0 && partialsum[d2 - 1] > 0) {
-                    count2 = lookaheadsum[--d2];
+                cumulativeCounts[green] = total;
+            }
+        } else {
+            for (int blue = box.b1; blue <= box.b2; blue++) {
+                for (int red = box.r1; red <= box.r2; red++) {
+                    for (int green = box.g1; green <= box.g2; green++) {
+                        total += histogram[getColorIndex(red, green, blue)];
+                    }
                 }
-
-                // set dimensions
-                if (color == 'r') {
-                    vbox1.r2 = d2;
-                    vbox2.r1 = d2 + 1;
-                } else if (color == 'g') {
-                    vbox1.g2 = d2;
-                    vbox2.g1 = d2 + 1;
-                } else
-                /* color == 'b' */
-                {
-                    vbox1.b2 = d2;
-                    vbox2.b1 = d2 + 1;
-                }
-
-                return new VBox[] {vbox1, vbox2};
+                cumulativeCounts[blue] = total;
             }
         }
+    }
 
-        throw new RuntimeException("VBox can't be cut");
+    private static VBox[] trySplitAlongAxis(VBox box, RgbAxis axis, int[] cumulativeCounts) {
+        int axisMin;
+        int axisMax;
+
+        if (axis == RgbAxis.RED) {
+            axisMin = box.r1;
+            axisMax = box.r2;
+        } else if (axis == RgbAxis.GREEN) {
+            axisMin = box.g1;
+            axisMax = box.g2;
+        } else {
+            axisMin = box.b1;
+            axisMax = box.b2;
+        }
+
+        int cutCoordinate = findCutCoordinate(axisMin, axisMax, cumulativeCounts);
+        if (cutCoordinate < 0) {
+            return null;
+        }
+
+        VBox lower = box.clone();
+        VBox upper = box.clone();
+        if (axis == RgbAxis.RED) {
+            lower.r2 = cutCoordinate;
+            upper.r1 = cutCoordinate + 1;
+        } else if (axis == RgbAxis.GREEN) {
+            lower.g2 = cutCoordinate;
+            upper.g1 = cutCoordinate + 1;
+        } else {
+            lower.b2 = cutCoordinate;
+            upper.b1 = cutCoordinate + 1;
+        }
+
+        return new VBox[] {lower, upper};
+    }
+
+    /**
+     * Returns the last coordinate of the lower half, or -1 if this axis cannot separate the pixels.
+     */
+    private static int findCutCoordinate(int axisMin, int axisMax, int[] cumulativeCounts) {
+        int totalCount = cumulativeCounts[axisMax];
+        int medianCoordinate = axisMin;
+        while (cumulativeCounts[medianCoordinate] <= totalCount / 2) {
+            medianCoordinate++;
+        }
+
+        int leftSpan = medianCoordinate - axisMin;
+        int rightSpan = axisMax - medianCoordinate;
+        int cutCoordinate;
+        if (leftSpan <= rightSpan) {
+            cutCoordinate = Math.min(axisMax - 1, medianCoordinate + rightSpan / 2);
+        } else {
+            // Divide before truncating because rounding an odd span first shifts the cut.
+            cutCoordinate = Math.max(axisMin, (int) (medianCoordinate - 1 - leftSpan / 2.0));
+        }
+
+        // Keep pixels on both sides because an empty child can have inverted bounds.
+        while (cutCoordinate < axisMax && cumulativeCounts[cutCoordinate] == 0) {
+            cutCoordinate++;
+        }
+        while (cumulativeCounts[cutCoordinate] == totalCount && cutCoordinate > axisMin
+                && cumulativeCounts[cutCoordinate - 1] > 0) {
+            cutCoordinate--;
+        }
+
+        if (cumulativeCounts[cutCoordinate] == totalCount) {
+            return -1;
+        }
+        return cutCoordinate;
     }
 
     public static CMap quantize(int[][] pixels, int maxcolors) {
@@ -436,72 +438,64 @@ public class MMCQ {
 
         // get the beginning vbox from the colors
         VBox vbox = vboxFromPixels(pixels, histo);
-        ArrayList<VBox> pq = new ArrayList<>();
-        pq.add(vbox);
+        List<VBox> boxes = new ArrayList<>();
+        boxes.add(vbox);
+
+        // Keep finished palette colors separate so neither phase retries an unsplittable box.
+        List<VBox> finishedBoxes = new ArrayList<>();
 
         // Round up to have the same behaviour as in JavaScript
         int target = (int) Math.ceil(FRACT_BY_POPULATION * maxcolors);
 
         // first set of colors, sorted by population
-        iter(pq, COMPARATOR_COUNT, target, histo);
+        splitBoxes(boxes, finishedBoxes, COMPARATOR_COUNT, target, histo);
 
         // Re-sort by the product of pixel occupancy times the size in color space.
-        Collections.sort(pq, COMPARATOR_PRODUCT);
+        Collections.sort(boxes, COMPARATOR_PRODUCT);
 
         // next set - generate the median cuts using the (npix * vol) sorting.
-        if (maxcolors > pq.size()) {
-            iter(pq, COMPARATOR_PRODUCT, maxcolors, histo);
+        if (maxcolors > boxes.size() + finishedBoxes.size()) {
+            splitBoxes(boxes, finishedBoxes, COMPARATOR_PRODUCT, maxcolors, histo);
+        }
+
+        if (!finishedBoxes.isEmpty()) {
+            boxes.addAll(finishedBoxes);
+            Collections.sort(boxes, COMPARATOR_PRODUCT);
         }
 
         // Reverse to put the highest elements first into the color map
-        Collections.reverse(pq);
+        Collections.reverse(boxes);
 
         // calculate the actual colors
         CMap cmap = new CMap();
-        for (VBox vb : pq) {
+        for (VBox vb : boxes) {
             cmap.push(vb);
         }
 
         return cmap;
     }
 
-    /**
-     * Inner function to do the iteration.
-     */
-    private static void iter(List<VBox> lh, Comparator<VBox> comparator, int target, int[] histo) {
-        int niters = 0;
-        VBox vbox;
+    private static void splitBoxes(
+            List<VBox> candidates,
+            List<VBox> finishedBoxes,
+            Comparator<VBox> comparator,
+            int target,
+            int[] histo) {
+        int attempts = 0;
 
-        while (niters < MAX_ITERATIONS) {
-            vbox = lh.get(lh.size() - 1);
-            if (vbox.count(false) == 0) {
-                Collections.sort(lh, comparator);
-                niters++;
+        while (candidates.size() + finishedBoxes.size() < target && !candidates.isEmpty()
+                && attempts++ < MAX_ITERATIONS) {
+            VBox box = candidates.remove(candidates.size() - 1);
+
+            VBox[] children = trySplitBox(histo, box);
+            if (children == null) {
+                finishedBoxes.add(box);
                 continue;
             }
-            lh.remove(lh.size() - 1);
 
-            // do the cut
-            VBox[] vboxes = medianCutApply(histo, vbox);
-            VBox vbox1 = vboxes[0];
-            VBox vbox2 = vboxes[1];
-
-            if (vbox1 == null) {
-                throw new RuntimeException("vbox1 not defined; shouldn't happen!");
-            }
-
-            lh.add(vbox1);
-            if (vbox2 != null) {
-                lh.add(vbox2);
-            }
-            Collections.sort(lh, comparator);
-
-            if (lh.size() >= target) {
-                return;
-            }
-            if (niters++ > MAX_ITERATIONS) {
-                return;
-            }
+            candidates.add(children[0]);
+            candidates.add(children[1]);
+            Collections.sort(candidates, comparator);
         }
     }
 

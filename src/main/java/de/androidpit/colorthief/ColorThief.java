@@ -80,7 +80,8 @@ public class ColorThief {
      * @param sourceImage
      *            the source image
      * @param colorCount
-     *            the size of the palette; the number of colors returned (minimum 2, maximum 256)
+     *            the maximum number of colors returned (minimum 2, maximum 256). The palette may
+     *            contain fewer colors if the image cannot be split into more color clusters.
      * 
      * @return the palette as array of RGB arrays
      * @throws IllegalArgumentException
@@ -100,7 +101,8 @@ public class ColorThief {
      * @param sourceImage
      *            the source image
      * @param colorCount
-     *            the size of the palette; the number of colors returned (minimum 2, maximum 256)
+     *            the maximum number of colors returned (minimum 2, maximum 256). The palette may
+     *            contain fewer colors if the image cannot be split into more color clusters.
      * @param quality
      *            1 is the highest quality setting. 10 is the default. There is a trade-off between
      *            quality and speed. Larger values sample fewer pixels and make palette generation
@@ -130,7 +132,8 @@ public class ColorThief {
      * @param sourceImage
      *            the source image
      * @param colorCount
-     *            the size of the palette; the number of colors returned (minimum 2, maximum 256)
+     *            the maximum number of colors returned (minimum 2, maximum 256). The palette may
+     *            contain fewer colors if the image cannot be split into more color clusters.
      * 
      * @return the color map
      * @throws IllegalArgumentException
@@ -146,7 +149,8 @@ public class ColorThief {
      * @param sourceImage
      *            the source image
      * @param colorCount
-     *            the size of the palette; the number of colors returned (minimum 2, maximum 256)
+     *            the maximum number of colors returned (minimum 2, maximum 256). The palette may
+     *            contain fewer colors if the image cannot be split into more color clusters.
      * @param quality
      *            1 is the highest quality setting. 10 is the default. There is a trade-off between
      *            quality and speed. Larger values sample fewer pixels and make palette generation
